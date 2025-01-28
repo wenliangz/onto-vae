@@ -1,3 +1,5 @@
 .ipynb_checkpoints
 /onto_vae/__pycache__
 /dist
+/models
+/.idea

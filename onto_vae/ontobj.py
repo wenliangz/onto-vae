@@ -150,6 +150,7 @@ class Ontobj():
         """
 
         # load obo file and gene -> term mapping file
+        # this function return a dict with key as the "GOTerm ID", and the value as the "GOTerm Object"
         dag = get_godag(obo, optional_attrs={'relationship'}, prt=None)
         gene_annot = pd.read_csv(gene_annot, sep="\t", header=None)
         gene_annot.columns = ['Gene', 'ID']
@@ -166,6 +167,7 @@ class Ontobj():
         gene_term_dict = {a: b["ID"].tolist() for a,b in gene_annot.groupby("Gene")}
 
         # convert the dag to a dictionary
+        # vars() is a built-in Python function that returns the __dict__ attribute of the GOTerm object
         term_term_dict = {term_id: [x for x in vars(dag[term_id])['_parents'] if x in annot.ID.tolist()] for term_id in annot[annot.depth > 0].ID.tolist()}
 
         # reverse the DAG to be able to count descendants and descendant genes
