@@ -31,6 +31,10 @@ class OntoVAE(nn.Module):
         bottom_threshold to tell which trimmed ontology to use
     neuronnum
         number of neurons per term
+        Effect of neuronnum
+            - Higher neuronnum values increase the model’s capacity by expanding the latent space and decoder layers.
+            - Maintains ontology structure while giving each term multiple neurons for better feature learning.
+            - Controls granularity in the latent space by providing multiple dimensions per ontology term.
     drop
         dropout rate, default is 0.2
     z_drop
@@ -52,6 +56,7 @@ class OntoVAE(nn.Module):
         self.mask_list = [torch.tensor(m, dtype=torch.float32) for m in self.mask_list]
         self.layer_dims_dec =  np.array([self.mask_list[0].shape[1]] + [m.shape[0] for m in self.mask_list])
         self.latent_dim = self.layer_dims_dec[0] * neuronnum
+        #  this indicates one hidden layer of encoder, responsible for directly mapping the input features to the latent space.
         self.layer_dims_enc = [self.latent_dim]
         self.neuronnum = neuronnum
         self.drop = drop

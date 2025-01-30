@@ -266,6 +266,7 @@ class OntoDecoder(nn.Module):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.in_features = in_features
         self.layer_dims = np.hstack([layer_dims[:-1] * neuronnum, layer_dims[-1]])
+        # NOTE: This design resembles a skip connection or DenseNet-style architecture where each layer receives inputs not just from the previous layer, but from all preceding layers.
         self.layer_shapes = [(np.sum(self.layer_dims[:i+1]), self.layer_dims[i+1]) for i in range(len(self.layer_dims)-1)]
         self.masks = []
         for m in mask_list[0:-1]:
