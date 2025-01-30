@@ -254,3 +254,58 @@ def find_all_paths(graph, start, end, path=[]):
 def data_path():
     path = pkg_resources.resource_filename(__name__, 'data/')
     return path
+
+
+import networkx as nx
+from pyvis.network import Network
+import random
+def visualize_ontology(ontology_dict, sample_size=None):
+    """
+    Visualizes an ontology dictionary interactively in a hierarchical layout using Pyvis.
+
+    Parameters:
+    - ontology_dict: dict (child -> list of parents)
+    - sample_size: int (optional) to limit nodes for large graphs
+    """
+    G = nx.DiGraph()
+    # Limit size if needed
+    sampled_keys = random.sample(list(ontology_dict.keys()), min(sample_size, len(ontology_dict)))
+    sampled_dict = {key: ontology_dict[key] for key in sampled_keys}
+    nodes = list(sampled_dict.keys())
+    # Add edges to the graph
+    for child in nodes:
+        for parent in ontology_dict.get(child, []):
+            G.add_edge(parent, child)  # Parent -> Child direction
+
+    # Convert to interactive Pyvis network
+    net = Network(notebook=True, directed=True)
+
+    # Add nodes and edges from NetworkX
+    net.from_nx(G)
+
+    # Enforce hierarchical layout
+    net.set_options("""
+    var options = {
+      "layout": {
+        "hierarchical": {
+          "enabled": true,
+          "direction": "LR",  
+          "sortMethod": "directed", 
+          "levelSeparation": 20,
+          "treeSpacing": 10,
+          "nodeSpacing": 5,
+          "blockShifting": true,
+          "edgeMinimization": true
+        }
+      },
+      "edges": {
+        "smooth": {
+          "type": "cubicBezier",
+          "roundness": 0.3
+        }
+      }
+    }
+    """)
+
+    # Display interactive graph
+    net.show("ontology_hierarchy.html")
