@@ -150,7 +150,7 @@ class Ontobj():
         """
 
         # load obo file and gene -> term mapping file
-        # this function return a dict with key as the "GOTerm ID", and the value as the "GOTerm Object"
+        # this function return a dict with key of the GOTerm "ID", and the value of the GOTerm "Object"
         dag = get_godag(obo, optional_attrs={'relationship'}, prt=None)
         gene_annot = pd.read_csv(gene_annot, sep="\t", header=None)
         gene_annot.columns = ['Gene', 'ID']
@@ -159,6 +159,7 @@ class Ontobj():
 
         # create initial annot file
         if filter_id is not None:
+            # create annotation pandas dataframe
             annot = self._dag_annot(dag, gene_annot, filter_id=filter_id)
         else:
             annot = self._dag_annot(dag, gene_annot)
