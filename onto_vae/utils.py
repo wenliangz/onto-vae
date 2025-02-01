@@ -256,25 +256,66 @@ def data_path():
     return path
 
 
+import random
 import networkx as nx
 from pyvis.network import Network
-import random
-def visualize_ontology(ontology_dict, sample_size=None):
+
+
+def sample_by_depth_and_size(ontology_dict, max_depth, sample_size):
+    """
+    Samples nodes and edges from an ontology dictionary up to a specified depth,
+    and limits the sample to a maximum size.
+
+    Parameters:
+    - ontology_dict: dict (child -> list of parents)
+    - max_depth: int (maximum depth to sample)
+    - sample_size: int (maximum number of nodes to sample)
+
+    Returns:
+    - sampled_dict: dict (sampled ontology dictionary)
+    """
+
+    def traverse(node, depth, max_depth, sampled_nodes, sampled_dict):
+        if depth > max_depth or node in sampled_nodes:
+            return
+        sampled_nodes.add(node)
+        sampled_dict[node] = ontology_dict.get(node, [])
+
+        for parent in ontology_dict.get(node, []):
+            traverse(parent, depth + 1, max_depth, sampled_nodes, sampled_dict)
+
+    sampled_dict = {}
+    sampled_nodes = set()
+
+    # Start traversal from each node (root nodes)
+    for node in ontology_dict:
+        if node not in sampled_nodes:
+            traverse(node, 0, max_depth, sampled_nodes, sampled_dict)
+
+    # Limit the sample size if needed
+    sampled_nodes = random.sample(list(sampled_dict.keys()), min(sample_size, len(sampled_dict)))
+    sampled_dict = {key: sampled_dict[key] for key in sampled_nodes}
+
+    return sampled_dict
+
+
+def visualize_ontology(ontology_dict, max_depth=3, sample_size=None):
     """
     Visualizes an ontology dictionary interactively in a hierarchical layout using Pyvis.
 
     Parameters:
     - ontology_dict: dict (child -> list of parents)
+    - max_depth: int (maximum depth to sample for the visualization)
     - sample_size: int (optional) to limit nodes for large graphs
     """
+    # Sample the ontology up to max_depth and sample_size
+    sampled_dict = sample_by_depth_and_size(ontology_dict, max_depth, sample_size)
+
     G = nx.DiGraph()
-    # Limit size if needed
-    sampled_keys = random.sample(list(ontology_dict.keys()), min(sample_size, len(ontology_dict)))
-    sampled_dict = {key: ontology_dict[key] for key in sampled_keys}
-    nodes = list(sampled_dict.keys())
+
     # Add edges to the graph
-    for child in nodes:
-        for parent in ontology_dict.get(child, []):
+    for child, parents in sampled_dict.items():
+        for parent in parents:
             G.add_edge(parent, child)  # Parent -> Child direction
 
     # Convert to interactive Pyvis network
@@ -286,14 +327,21 @@ def visualize_ontology(ontology_dict, sample_size=None):
     # Enforce hierarchical layout
     net.set_options("""
     var options = {
+      "configure": {
+        "enabled": false
+      },
+      "manipulation": {
+        "enabled": false
+      },
+
       "layout": {
         "hierarchical": {
           "enabled": true,
           "direction": "LR",  
           "sortMethod": "directed", 
-          "levelSeparation": 20,
-          "treeSpacing": 10,
-          "nodeSpacing": 5,
+          "levelSeparation": 200,
+          "treeSpacing": 1,
+          "nodeSpacing": 1,
           "blockShifting": true,
           "edgeMinimization": true
         }
@@ -301,7 +349,7 @@ def visualize_ontology(ontology_dict, sample_size=None):
       "edges": {
         "smooth": {
           "type": "cubicBezier",
-          "roundness": 0.3
+          "roundness": 0.2
         }
       }
     }
