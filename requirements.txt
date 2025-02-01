@@ -5,3 +5,4 @@ tqdm>=4.60.0
 colorcet>=3.0.0
 seaborn>=0.11.0
 pyvis
+plotly
