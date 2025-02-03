@@ -392,7 +392,7 @@ class Ontobj():
         # create the index of binary matrix for each level to every other levels, so each level has a list of index
         idx = [[mat.columns.name in mask_cols[i] and mat.index.name == mask_rows[i] for mat in bin_mat_list] for i in range(len(mask_rows))]
         # get the actual binary matrix from bin_mat_list for each level using the index and then concat them horizontally
-        # so in the end, for each level, you have a mast for all elements in each level to all elements in any other levels
+        # so in the end, for each level, you have a mast for all elements in that level to all elements in any other levels
         masks = [np.array(pd.concat([N for i,N in enumerate(bin_mat_list) if j[i] == True][::-1], axis=1)) for j in idx]
         return masks
 

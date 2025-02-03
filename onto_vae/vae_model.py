@@ -54,9 +54,11 @@ class OntoVAE(nn.Module):
         self.in_features = len(self.genes)
         self.mask_list = ontobj.masks[str(top_thresh) + '_' + str(bottom_thresh)]['decoder']
         self.mask_list = [torch.tensor(m, dtype=torch.float32) for m in self.mask_list]
-        self.layer_dims_dec =  np.array([self.mask_list[0].shape[1]] + [m.shape[0] for m in self.mask_list])
+        # calculate layer dimensions of the decoder
+        self.layer_dims_dec = np.array([self.mask_list[0].shape[1]] + [m.shape[0] for m in self.mask_list])
         self.latent_dim = self.layer_dims_dec[0] * neuronnum
-        #  this indicates one hidden layer of encoder, responsible for directly mapping the input features to the latent space.
+        #  layer dimension of the encoder.
+        #  the list has only one number indicating only one hidden layer of encoder, responsible for directly mapping the input features to the latent space.
         self.layer_dims_enc = [self.latent_dim]
         self.neuronnum = neuronnum
         self.drop = drop
